@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: API E-commerce
+  version: 1.0.0
+  description: >-
+    Esqueleto inicial. As operações de negócio retornam 501 e ainda não
+    validam ou processam os corpos de exemplo. Autenticação não está implementada.
+    Todas as requisições podem enviar x-request-id (letras, números, ponto, hífen
+    ou sublinhado; até 128 caracteres); a resposta devolve o ID ou um UUID gerado.
+    JSON inválido retorna 400 INVALID_JSON; corpo JSON acima de 100kb retorna
+    413 PAYLOAD_TOO_LARGE. Ambos usam o esquema Error e incluem requestId.
+servers:
+  - url: http://localhost:3000
+paths:
+  /v1/catalogo/produtos:
+    get:
+      summary: Listar produtos (stub)
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/carrinho/items:
+    post:
+      summary: Adicionar item ao carrinho (stub)
+      requestBody:
+        description: Formato proposto, ainda não validado.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                qty:
+                  type: integer
+                  minimum: 1
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/carrinho/items/{itemId}:
+    delete:
+      summary: Remover item do carrinho (stub)
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/checkout:
+    post:
+      summary: Gerar pedido a partir do carrinho (stub)
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/pagamentos:
+    post:
+      summary: Processar pagamento simulado (stub)
+      requestBody:
+        description: Formato proposto, ainda não validado.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  format: uuid
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/usuarios/signup:
+    post:
+      summary: Cadastrar usuário (stub)
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /v1/usuarios/login:
+    post:
+      summary: Autenticar usuário (stub)
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      responses:
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /health:
+    get:
+      summary: Verificar API e banco
+      responses:
+        '200':
+          description: Banco acessível.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Healthy'
+        '503':
+          description: Banco indisponível.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, database, requestId]
+                properties:
+                  status: { type: string, enum: [unavailable] }
+                  database: { type: string, enum: [unavailable] }
+                  requestId: { type: string }
+  /metrics:
+    get:
+      summary: Métricas no formato Prometheus
+      responses:
+        '200':
+          description: Métricas.
+          headers:
+            x-request-id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            text/plain:
+              schema: { type: string }
+components:
+  headers:
+    RequestId:
+      description: Identificador recebido válido ou UUID gerado.
+      schema:
+        type: string
+  schemas:
+    Healthy:
+      type: object
+      required: [status, database]
+      properties:
+        status: { type: string, enum: [ok] }
+        database: { type: string, enum: [ok] }
+    Error:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+        requestId: { type: string }
+  responses:
+    NotImplemented:
+      description: Operação de negócio ainda não implementada.
+      headers:
+        x-request-id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: NOT_IMPLEMENTED
+              message: Funcionalidade ainda nao implementada.
+            requestId: exemplo-123
+  requestBodies:
+    Credentials:
+      description: Formato proposto, ainda não validado.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email: { type: string, format: email }
+              password: { type: string, format: password }
